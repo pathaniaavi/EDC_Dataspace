@@ -1,4 +1,4 @@
-to build 
+#to build 
 ./gradlew connector:build
 
 # start a provider
