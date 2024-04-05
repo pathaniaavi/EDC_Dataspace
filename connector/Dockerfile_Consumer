@@ -1,0 +1,33 @@
+FROM openjdk:17-jdk-slim
+
+WORKDIR /app
+
+COPY connector/build/libs/connector.jar /app
+
+# Copy configuration files
+COPY resources/configuration/consumer-configuration.properties /app/configuration/connector/consumer-configuration.properties
+COPY resources/configuration/consumer-vault.properties /app/configuration/connector/consumer-vault.properties
+
+# Copy certificates
+COPY resources/certs/cert.pfx /app/resources/certs/cert.pfx
+
+# Expose necessary ports if any
+EXPOSE 29191
+EXPOSE 29192
+EXPOSE 29193
+EXPOSE 29194
+
+
+# Accept build argument for participant ID (default to "provider" if not provided)
+ARG EDC_PARTICIPANT_ID=consumer
+
+# Set environment variable based on the build argument
+ENV EDC_PARTICIPANT_ID=$EDC_PARTICIPANT_ID
+
+# Command to run the application
+ENTRYPOINT ["java", \
+           "-Dedc.keystore=resources/certs/cert.pfx", \
+           "-Dedc.keystore.password=123456", \
+           "-Dedc.vault=configuration/connector/consumer-vault.properties", \
+           "-Dedc.fs.config=configuration/connector/consumer-configuration.properties", \
+           "-jar", "connector.jar"]
